@@ -1,0 +1,113 @@
+<html>
+<head>
+        <title>Hitung Gaji Pokok</title>
+</head>
+<body>
+<pre>
+Set Program
+Gaji Normal (Rp/Jam)                    : <input type="text" class="input-data rupiah" id="gn" value="Rp. 15.000">
+Gaji Lembur (Rp/Jam)                    : <input type="text" class="input-data rupiah" id="gl" value="Rp. 22.500">
+Jam Kerja Perminggu (jam) (max : 168)   : <input type="text" class="input-data jam" id="jp" value="40">
+
+Run Program
+Jumlah Jam Kerja (jam) (max : 168)      : <input type="text" class="input-data jam" id="jk" value="52">
+Pengeluaran (Rp. )                      : <input type="text" class="input-data rupiah" id="pe" value="Rp. 600.000">
+                                        <input type="button" value="Calculate" onclick="main()">
+</pre>
+
+<script type="text/javascript">
+
+        function main(){
+                let gaji_normal = parseInt((document.getElementById("gn").value.split("Rp. ")[1].split(".")).join(""));
+                let gaji_lembur = parseInt((document.getElementById("gl").value.split("Rp. ")[1].split(".")).join(""));
+                let jam_kerja_perminggu = parseInt(document.getElementById("jp").value);
+                let jam_kerja = parseInt(document.getElementById("jk").value);
+                let pengeluaran = parseInt((document.getElementById("pe").value.split("Rp. ")[1].split(".")).join(""));
+                let gaji = 0;
+
+                if (jam_kerja > 168) {
+                        alert("Jumlah jam kerja melebihi jumlah jam selama seminggu (Max : 168)");
+                        return;
+                }
+
+                if (jam_kerja_perminggu > 168) {
+                        alert("Jumlah jam kerja perminggu melebihi jumlah jam selama seminggu (Max : 168)");
+                        return;
+                }
+
+                if (jam_kerja > jam_kerja_perminggu) {
+                        gaji = jam_kerja_perminggu * gaji_normal + (jam_kerja - jam_kerja_perminggu) * gaji_lembur;
+                } else {
+                        gaji = jam_kerja * gaji_normal;
+                }
+
+                if (gaji > pengeluaran) {
+                        alert(`Gaji : ${formatRupiah(gaji.toString(), "Rp. ")}, dan bisa menabung sebesar ${formatRupiah((gaji - pengeluaran).toString(), "Rp. ")}`)
+                }else if (gaji == pengeluaran) {
+                        alert(`Gaji : ${formatRupiah(gaji.toString(), "Rp. ")}, dan tidak bisa menabung`);
+                }else if (gaji < pengeluaran) {
+                        alert(`Gaji : ${formatRupiah(gaji.toString(), "Rp. ")}, dan cari tambahan untuk bisa menabung`);
+                }
+        }
+
+        document.querySelectorAll(".rupiah").forEach(el => {
+                el.addEventListener("keyup", evt => {
+                        if(el.value == "" || 
+                                parseInt(el.value.split("Rp. ")[1]) == 0 || 
+                                el.value == "Rp. "){
+
+                                        if (el.id == "gn") {
+                                                document.getElementById("gl").value = "Rp. 0";
+                                        }
+                                        el.value = "Rp. 0";
+                                        return;
+                        }
+
+                        if (el.id == "gn") {
+                                document.getElementById("gl").value = formatRupiah(parseInt((el.value.split("Rp. ")[1].split(".")).join("") * 1.5).toString(), "Rp. ");
+                        }
+                        el.value = formatRupiah(el.value, "Rp. ");
+                });
+                
+        });
+
+        document.querySelectorAll(".jam").forEach(el => {
+                el.addEventListener("keyup", evt => {
+
+                        if (el.value == "") {
+                                el.value = 0;
+                                return;
+                        }
+
+                        el.value = parseInt(el.value);
+                });
+        });
+
+        document.querySelectorAll(".input-data").forEach(el => {
+                el.addEventListener("keypress", function(e) {
+                        const key = e.which || e.keyCode;
+                        if (key != 32 && (key < 48 || key > 57)) {
+                                e.preventDefault();
+                        }
+                });
+        });
+
+        function formatRupiah(angka, prefix) {
+                let number_string = parseInt(angka.replace(/[^,\d]/g, "").toString()).toString();
+                let split = number_string.split(",");
+                let sisa = split[0].length % 3;
+                let rupiah = split[0].substr(0, sisa);
+                let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                        let separator = sisa ? "." : "";
+                        rupiah += separator + ribuan.join(".");
+                }
+
+                rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+                return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+        }
+
+</script>
+</body>
+</html>
